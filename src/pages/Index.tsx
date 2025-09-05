@@ -16,9 +16,7 @@ export default function Index() {
   ]);
   const [hearts, setHearts] = useState<{id: number, left: number, delay: number}[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const [isPlaying, setIsPlaying] = useState(false);
   const [confetti, setConfetti] = useState<{id: number, x: number, y: number, color: string, rotation: number, delay: number}[]>([]);
-  const audioRef = useRef<HTMLAudioElement>(null);
   
   useEffect(() => {
     const generateHearts = () => {
@@ -46,19 +44,7 @@ export default function Index() {
     return () => clearInterval(slideInterval);
   }, []);
 
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (audioRef.current) {
-        audioRef.current.play().then(() => {
-          setIsPlaying(true);
-        }).catch(() => {
-          console.log('Автозапуск музыки ограничен браузером');
-        });
-      }
-    }, 1000);
-    
-    return () => clearTimeout(timer);
-  }, []);
+
 
   useEffect(() => {
     const generateConfetti = () => {
@@ -87,16 +73,7 @@ export default function Index() {
     return () => clearTimeout(timer);
   }, []);
 
-  const playMusic = () => {
-    if (audioRef.current) {
-      if (isPlaying) {
-        audioRef.current.pause();
-      } else {
-        audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-    }
-  };
+
 
   const memories = [
     {
@@ -321,32 +298,7 @@ export default function Index() {
               💖✨🎂✨💖
             </div>
             
-            {/* Музыкальный плеер */}
-            {isPlaying && (
-              <div className="mt-8 flex items-center justify-center space-x-4 text-rose-600">
-                <Icon name="Music" className="animate-pulse" size={24} />
-                <span className="text-lg">♪ С Днем Рождения! ♪</span>
-                <Button
-                  onClick={playMusic}
-                  variant="outline"
-                  className="border-rose-300 text-rose-600 hover:bg-rose-50"
-                >
-                  <Icon name="Pause" className="mr-2" size={16} />
-                  Пауза
-                </Button>
-              </div>
-            )}
-            
-            {/* Скрытый аудиоплеер */}
-            <audio
-              ref={audioRef}
-              loop
-              preload="auto"
-              className="hidden"
-            >
-              <source src="https://cdn.freesound.org/previews/414/414209_5063937-lq.mp3" type="audio/mpeg" />
-              <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav" />
-            </audio>
+
           </div>
         </section>
       </div>
