@@ -17,6 +17,7 @@ export default function Index() {
   const [hearts, setHearts] = useState<{id: number, left: number, delay: number}[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
+  const [confetti, setConfetti] = useState<{id: number, x: number, y: number, color: string, rotation: number, delay: number}[]>([]);
   const audioRef = useRef<HTMLAudioElement>(null);
   
   useEffect(() => {
@@ -56,6 +57,33 @@ export default function Index() {
       }
     }, 1000);
     
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const generateConfetti = () => {
+      const colors = ['#ff6b9d', '#c44569', '#f8b500', '#6a89cc', '#82ccdd', '#b8e994', '#ff9ff3', '#54a0ff'];
+      const newConfetti = [];
+      
+      for (let i = 0; i < 80; i++) {
+        newConfetti.push({
+          id: Date.now() + i,
+          x: Math.random() * 100,
+          y: -20,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          rotation: Math.random() * 360,
+          delay: Math.random() * 3
+        });
+      }
+      
+      setConfetti(newConfetti);
+      
+      setTimeout(() => {
+        setConfetti([]);
+      }, 6000);
+    };
+    
+    const timer = setTimeout(generateConfetti, 500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -109,6 +137,24 @@ export default function Index() {
           >
             ❤️
           </div>
+        ))}
+      </div>
+
+      {/* Конфетти */}
+      <div className="fixed inset-0 pointer-events-none z-30">
+        {confetti.map(piece => (
+          <div
+            key={piece.id}
+            className="absolute w-3 h-3 animate-fall"
+            style={{
+              left: `${piece.x}%`,
+              backgroundColor: piece.color,
+              animationDelay: `${piece.delay}s`,
+              animationDuration: '4s',
+              transform: `rotate(${piece.rotation}deg)`,
+              top: '-50px'
+            }}
+          />
         ))}
       </div>
 
@@ -279,7 +325,7 @@ export default function Index() {
             {isPlaying && (
               <div className="mt-8 flex items-center justify-center space-x-4 text-rose-600">
                 <Icon name="Music" className="animate-pulse" size={24} />
-                <span className="text-lg">Мелодия играет</span>
+                <span className="text-lg">♪ С Днем Рождения! ♪</span>
                 <Button
                   onClick={playMusic}
                   variant="outline"
@@ -298,6 +344,7 @@ export default function Index() {
               preload="auto"
               className="hidden"
             >
+              <source src="https://cdn.freesound.org/previews/414/414209_5063937-lq.mp3" type="audio/mpeg" />
               <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav" />
             </audio>
           </div>
