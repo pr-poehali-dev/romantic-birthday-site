@@ -2,9 +2,10 @@ import { useState, useEffect, useRef } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
 
 export default function Index() {
-  const [wishes] = useState<string[]>([
+  const [wishes, setWishes] = useState<string[]>([
     "Желаю тебе самых ярких эмоций, бесконечного счастья и исполнения всех мечт! ❤️",
     "Пусть каждый день твоей жизни будет наполнен солнечным светом и теплыми объятиями! 🌞",
     "Желаю тебе крепкого здоровья, искренней любви и безграничного счастья! 💕",
@@ -17,6 +18,7 @@ export default function Index() {
   const [hearts, setHearts] = useState<{id: number, left: number, delay: number}[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [confetti, setConfetti] = useState<{id: number, x: number, y: number, color: string, rotation: number, delay: number}[]>([]);
+  const [newWish, setNewWish] = useState('');
   
   useEffect(() => {
     const generateHearts = () => {
@@ -266,6 +268,38 @@ export default function Index() {
               💌 Пожелания для Тебя 💌
             </h2>
             
+            {/* Форма добавления пожелания */}
+            <Card className="mb-12 border-2 border-rose-200 bg-white/90 backdrop-blur-sm shadow-lg">
+              <CardContent className="p-6">
+                <div className="flex flex-col space-y-4">
+                  <div className="text-center mb-4">
+                    <h3 className="text-xl font-semibold text-rose-600 mb-2">✨ Добавь свое пожелание ✨</h3>
+                    <p className="text-gray-600">Поделись теплыми словами в этот особенный день!</p>
+                  </div>
+                  <Textarea
+                    placeholder="Напиши свое пожелание... 💕"
+                    value={newWish}
+                    onChange={(e) => setNewWish(e.target.value)}
+                    className="border-rose-200 focus:border-rose-400 resize-none min-h-[100px]"
+                    rows={4}
+                  />
+                  <Button 
+                    onClick={() => {
+                      if (newWish.trim()) {
+                        setWishes(prev => [...prev, newWish.trim()]);
+                        setNewWish('');
+                      }
+                    }}
+                    className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white self-end"
+                    disabled={!newWish.trim()}
+                  >
+                    <Icon name="Heart" className="mr-2" size={16} />
+                    Добавить пожелание
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Список пожеланий */}
             <div className="space-y-6">
               {wishes.map((wish, index) => (
