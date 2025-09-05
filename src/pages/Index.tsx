@@ -4,15 +4,15 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 
 export default function Index() {
-  const [wishes] = useState<{text: string, author: string}[]>([
-    { text: "Желаю тебе самых ярких эмоций, бесконечного счастья и исполнения всех мечт! ❤️", author: "От твоего любимого" },
-    { text: "Пусть каждый день твоей жизни будет наполнен солнечным светом и теплыми объятиями! 🌞", author: "Твоя семья" },
-    { text: "Желаю тебе крепкого здоровья, искренней любви и безграничного счастья! 💕", author: "Лучшая подруга" },
-    { text: "Пусть все твои мечты сбываются, а сердце всегда поет от радости! 🎵", author: "Коллеги" },
-    { text: "Будь всегда такой же красивой, умной и неповторимой! Ты особенная! ✨", author: "Мама" },
-    { text: "Желаю тебе моря позитива, океан улыбок и вселенную любви! 🌊", author: "Друзья детства" },
-    { text: "Пусть этот новый год жизни принесет только приятные сюрпризы! 🎁", author: "Одноклассники" },
-    { text: "Оставайся всегда молодой душой и открытым сердцем! 💝", author: "Соседи" }
+  const [wishes] = useState<string[]>([
+    "Желаю тебе самых ярких эмоций, бесконечного счастья и исполнения всех мечт! ❤️",
+    "Пусть каждый день твоей жизни будет наполнен солнечным светом и теплыми объятиями! 🌞",
+    "Желаю тебе крепкого здоровья, искренней любви и безграничного счастья! 💕",
+    "Пусть все твои мечты сбываются, а сердце всегда поет от радости! 🎵",
+    "Будь всегда такой же красивой, умной и неповторимой! Ты особенная! ✨",
+    "Желаю тебе моря позитива, океан улыбок и вселенную любви! 🌊",
+    "Пусть этот новый год жизни принесет только приятные сюрпризы! 🎁",
+    "Оставайся всегда молодой душой и открытым сердцем! 💝"
   ]);
   const [hearts, setHearts] = useState<{id: number, left: number, delay: number}[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -43,6 +43,20 @@ export default function Index() {
     }, 4000);
     
     return () => clearInterval(slideInterval);
+  }, []);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.play().then(() => {
+          setIsPlaying(true);
+        }).catch(() => {
+          console.log('Автозапуск музыки ограничен браузером');
+        });
+      }
+    }, 1000);
+    
+    return () => clearTimeout(timer);
   }, []);
 
   const playMusic = () => {
@@ -237,8 +251,7 @@ export default function Index() {
                     <div className="flex items-start space-x-4">
                       <div className="text-2xl">💝</div>
                       <div className="flex-1">
-                        <p className="text-gray-700 mb-2 italic text-lg leading-relaxed">"{wish.text}"</p>
-                        <p className="text-rose-600 font-medium">— {wish.author}</p>
+                        <p className="text-gray-700 text-lg leading-relaxed italic">"{wish}"</p>
                       </div>
                     </div>
                   </CardContent>
@@ -263,23 +276,29 @@ export default function Index() {
             </div>
             
             {/* Музыкальный плеер */}
-            <div className="mt-8">
-              <Button
-                onClick={playMusic}
-                className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-4 text-lg transition-all duration-300 hover:scale-105"
-              >
-                <Icon name={isPlaying ? "Pause" : "Play"} className="mr-2" size={20} />
-                {isPlaying ? 'Пауза' : 'Включить мелодию'}
-              </Button>
-            </div>
+            {isPlaying && (
+              <div className="mt-8 flex items-center justify-center space-x-4 text-rose-600">
+                <Icon name="Music" className="animate-pulse" size={24} />
+                <span className="text-lg">Мелодия играет</span>
+                <Button
+                  onClick={playMusic}
+                  variant="outline"
+                  className="border-rose-300 text-rose-600 hover:bg-rose-50"
+                >
+                  <Icon name="Pause" className="mr-2" size={16} />
+                  Пауза
+                </Button>
+              </div>
+            )}
             
             {/* Скрытый аудиоплеер */}
             <audio
               ref={audioRef}
               loop
+              preload="auto"
               className="hidden"
             >
-              <source src="https://cdn.freesound.org/previews/316/316847_5705003-lq.mp3" type="audio/mpeg" />
+              <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav" />
             </audio>
           </div>
         </section>
