@@ -1,17 +1,23 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 
 export default function Index() {
-  const [wishes, setWishes] = useState<{text: string, author: string}[]>([
-    { text: "Желаю тебе самых ярких эмоций, бесконечного счастья и исполнения всех мечт! ❤️", author: "От твоего любимого" }
+  const [wishes] = useState<{text: string, author: string}[]>([
+    { text: "Желаю тебе самых ярких эмоций, бесконечного счастья и исполнения всех мечт! ❤️", author: "От твоего любимого" },
+    { text: "Пусть каждый день твоей жизни будет наполнен солнечным светом и теплыми объятиями! 🌞", author: "Твоя семья" },
+    { text: "Желаю тебе крепкого здоровья, искренней любви и безграничного счастья! 💕", author: "Лучшая подруга" },
+    { text: "Пусть все твои мечты сбываются, а сердце всегда поет от радости! 🎵", author: "Коллеги" },
+    { text: "Будь всегда такой же красивой, умной и неповторимой! Ты особенная! ✨", author: "Мама" },
+    { text: "Желаю тебе моря позитива, океан улыбок и вселенную любви! 🌊", author: "Друзья детства" },
+    { text: "Пусть этот новый год жизни принесет только приятные сюрпризы! 🎁", author: "Одноклассники" },
+    { text: "Оставайся всегда молодой душой и открытым сердцем! 💝", author: "Соседи" }
   ]);
-  const [newWish, setNewWish] = useState('');
-  const [newAuthor, setNewAuthor] = useState('');
   const [hearts, setHearts] = useState<{id: number, left: number, delay: number}[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const audioRef = useRef<HTMLAudioElement>(null);
   
   useEffect(() => {
     const generateHearts = () => {
@@ -31,11 +37,22 @@ export default function Index() {
     return () => clearInterval(interval);
   }, []);
 
-  const addWish = () => {
-    if (newWish.trim() && newAuthor.trim()) {
-      setWishes([...wishes, { text: newWish, author: newAuthor }]);
-      setNewWish('');
-      setNewAuthor('');
+  useEffect(() => {
+    const slideInterval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % memories.length);
+    }, 4000);
+    
+    return () => clearInterval(slideInterval);
+  }, []);
+
+  const playMusic = () => {
+    if (audioRef.current) {
+      if (isPlaying) {
+        audioRef.current.pause();
+      } else {
+        audioRef.current.play();
+      }
+      setIsPlaying(!isPlaying);
     }
   };
 
@@ -118,71 +135,100 @@ export default function Index() {
           </div>
         </section>
 
-        {/* Секция воспоминаний */}
+        {/* Слайдшоу воспоминаний */}
         <section className="py-20 px-4 bg-white/80 backdrop-blur-sm">
           <div className="max-w-6xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold text-center text-rose-600 mb-16">
               💫 Наши Воспоминания 💫
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {memories.map((memory, index) => (
-                <Card key={index} className="group overflow-hidden border-rose-200 hover:shadow-xl transition-all duration-300 hover:scale-105 animate-fade-in" style={{ animationDelay: `${index * 0.1}s` }}>
-                  <div className="relative">
-                    <img 
-                      src={memory.url} 
+            <div className="relative max-w-4xl mx-auto">
+              {/* Главное слайдшоу */}
+              <div className="relative h-96 md:h-[500px] rounded-2xl overflow-hidden shadow-2xl">
+                {memories.map((memory, index) => (
+                  <div
+                    key={index}
+                    className={`absolute inset-0 transition-opacity duration-1000 ${
+                      index === currentSlide ? 'opacity-100' : 'opacity-0'
+                    }`}
+                  >
+                    <img
+                      src={memory.url}
                       alt={memory.caption}
-                      className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
+                      className="w-full h-full object-cover"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                    <div className="absolute bottom-4 left-4 right-4 text-white opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <p className="text-sm font-medium">{memory.caption}</p>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    <div className="absolute bottom-6 left-6 right-6 text-white">
+                      <h3 className="text-2xl font-bold mb-2">{memory.caption}</h3>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-rose-300">💝</span>
+                        <span className="text-lg opacity-90">Драгоценный момент</span>
+                      </div>
                     </div>
                   </div>
-                </Card>
-              ))}
+                ))}
+                
+                {/* Кнопки управления */}
+                <button
+                  onClick={() => setCurrentSlide(currentSlide === 0 ? memories.length - 1 : currentSlide - 1)}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300"
+                >
+                  <Icon name="ChevronLeft" size={24} />
+                </button>
+                <button
+                  onClick={() => setCurrentSlide((currentSlide + 1) % memories.length)}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm text-white p-3 rounded-full hover:bg-white/30 transition-all duration-300"
+                >
+                  <Icon name="ChevronRight" size={24} />
+                </button>
+              </div>
+              
+              {/* Индикаторы */}
+              <div className="flex justify-center space-x-3 mt-6">
+                {memories.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                      index === currentSlide
+                        ? 'bg-rose-500 scale-125'
+                        : 'bg-rose-300 hover:bg-rose-400'
+                    }`}
+                  />
+                ))}
+              </div>
+              
+              {/* Миниатюры */}
+              <div className="grid grid-cols-5 gap-3 mt-8">
+                {memories.map((memory, index) => (
+                  <button
+                    key={index}
+                    onClick={() => setCurrentSlide(index)}
+                    className={`relative h-20 rounded-lg overflow-hidden transition-all duration-300 ${
+                      index === currentSlide
+                        ? 'ring-4 ring-rose-400 scale-105'
+                        : 'hover:scale-105 opacity-70 hover:opacity-100'
+                    }`}
+                  >
+                    <img
+                      src={memory.url}
+                      alt={memory.caption}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* Интерактивные пожелания */}
+        {/* Пожелания */}
         <section className="py-20 px-4 bg-gradient-to-r from-rose-50 to-pink-50">
           <div className="max-w-4xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-bold text-center text-rose-600 mb-16">
               💌 Пожелания для Тебя 💌
             </h2>
             
-            {/* Форма добавления пожелания */}
-            <Card className="mb-12 p-6 border-rose-200 bg-white/90 backdrop-blur-sm animate-scale-in">
-              <CardContent className="space-y-4">
-                <h3 className="text-xl font-semibold text-rose-700 mb-4">
-                  <Icon name="PenTool" className="inline mr-2" />
-                  Добавить пожелание
-                </h3>
-                <Textarea
-                  placeholder="Напишите ваше пожелание..."
-                  value={newWish}
-                  onChange={(e) => setNewWish(e.target.value)}
-                  className="border-rose-200 focus:border-rose-400 resize-none"
-                  rows={3}
-                />
-                <Input
-                  placeholder="Ваше имя"
-                  value={newAuthor}
-                  onChange={(e) => setNewAuthor(e.target.value)}
-                  className="border-rose-200 focus:border-rose-400"
-                />
-                <Button 
-                  onClick={addWish}
-                  className="w-full bg-rose-500 hover:bg-rose-600 text-white transition-all duration-300 hover:scale-105"
-                  disabled={!newWish.trim() || !newAuthor.trim()}
-                >
-                  <Icon name="Heart" className="mr-2" />
-                  Отправить с любовью
-                </Button>
-              </CardContent>
-            </Card>
-
             {/* Список пожеланий */}
             <div className="space-y-6">
               {wishes.map((wish, index) => (
@@ -212,9 +258,29 @@ export default function Index() {
               Пусть этот день принесет тебе столько радости, сколько ты приносишь в мою жизнь каждый день. 
               Ты делаешь мир ярче своей улыбкой и теплее своим сердцем.
             </p>
-            <div className="text-6xl animate-pulse">
+            <div className="text-6xl animate-pulse mb-8">
               💖✨🎂✨💖
             </div>
+            
+            {/* Музыкальный плеер */}
+            <div className="mt-8">
+              <Button
+                onClick={playMusic}
+                className="bg-rose-500 hover:bg-rose-600 text-white px-8 py-4 text-lg transition-all duration-300 hover:scale-105"
+              >
+                <Icon name={isPlaying ? "Pause" : "Play"} className="mr-2" size={20} />
+                {isPlaying ? 'Пауза' : 'Включить мелодию'}
+              </Button>
+            </div>
+            
+            {/* Скрытый аудиоплеер */}
+            <audio
+              ref={audioRef}
+              loop
+              className="hidden"
+            >
+              <source src="https://cdn.freesound.org/previews/316/316847_5705003-lq.mp3" type="audio/mpeg" />
+            </audio>
           </div>
         </section>
       </div>
