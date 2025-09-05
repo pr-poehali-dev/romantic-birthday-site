@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Textarea } from '@/components/ui/textarea';
 
 export default function Index() {
   const [wishes, setWishes] = useState<string[]>([
@@ -18,7 +17,7 @@ export default function Index() {
   const [hearts, setHearts] = useState<{id: number, left: number, delay: number}[]>([]);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [confetti, setConfetti] = useState<{id: number, x: number, y: number, color: string, rotation: number, delay: number}[]>([]);
-  const [newWish, setNewWish] = useState('');
+  const audioRef = useRef<HTMLAudioElement>(null);
   
   useEffect(() => {
     const generateHearts = () => {
@@ -47,6 +46,19 @@ export default function Index() {
   }, []);
 
 
+
+  // Автозапуск музыки
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (audioRef.current) {
+        audioRef.current.play().catch(() => {
+          console.log('Автозапуск музыки ограничен браузером');
+        });
+      }
+    }, 1000);
+    
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const generateConfetti = () => {
@@ -268,37 +280,7 @@ export default function Index() {
               💌 Пожелания для Тебя 💌
             </h2>
             
-            {/* Форма добавления пожелания */}
-            <Card className="mb-12 border-2 border-rose-200 bg-white/90 backdrop-blur-sm shadow-lg">
-              <CardContent className="p-6">
-                <div className="flex flex-col space-y-4">
-                  <div className="text-center mb-4">
-                    <h3 className="text-xl font-semibold text-rose-600 mb-2">✨ Добавь свое пожелание ✨</h3>
-                    <p className="text-gray-600">Поделись теплыми словами в этот особенный день!</p>
-                  </div>
-                  <Textarea
-                    placeholder="Напиши свое пожелание... 💕"
-                    value={newWish}
-                    onChange={(e) => setNewWish(e.target.value)}
-                    className="border-rose-200 focus:border-rose-400 resize-none min-h-[100px]"
-                    rows={4}
-                  />
-                  <Button 
-                    onClick={() => {
-                      if (newWish.trim()) {
-                        setWishes(prev => [...prev, newWish.trim()]);
-                        setNewWish('');
-                      }
-                    }}
-                    className="bg-gradient-to-r from-rose-500 to-pink-500 hover:from-rose-600 hover:to-pink-600 text-white self-end"
-                    disabled={!newWish.trim()}
-                  >
-                    <Icon name="Heart" className="mr-2" size={16} />
-                    Добавить пожелание
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+
 
             {/* Список пожеланий */}
             <div className="space-y-6">
@@ -332,8 +314,26 @@ export default function Index() {
               💖✨🎂✨💖
             </div>
             
-
+            <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-8 border-2 border-rose-200 shadow-lg">
+              <p className="text-2xl font-semibold text-rose-600 mb-4">
+                С любовью и наилучшими пожеланиями! 💕
+              </p>
+              <div className="text-4xl">
+                🌹💖🎉💖🌹
+              </div>
+            </div>
           </div>
+          
+          {/* Скрытый аудиоплеер */}
+          <audio
+            ref={audioRef}
+            loop
+            preload="auto"
+            className="hidden"
+          >
+            <source src="https://www.soundjay.com/misc/sounds/bell-ringing-05.wav" type="audio/wav" />
+            <source src="https://cdn.freesound.org/previews/414/414209_5063937-lq.mp3" type="audio/mpeg" />
+          </audio>
         </section>
       </div>
     </div>
